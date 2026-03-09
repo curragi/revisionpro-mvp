@@ -1,6 +1,6 @@
 // components/dashboard/UrgentActionCard.tsx
-// Single item card in the "Acciones Urgentes" list.
-// Shows vehicle info, service type, urgency, and WhatsApp mock button.
+// Single item in the "Acciones Urgentes" list.
+// Clean white card with a colored left-border for urgency signalling.
 
 "use client";
 
@@ -31,12 +31,26 @@ export function UrgentActionCard({ item, onNotified }: UrgentActionCardProps) {
     const isOverdue = days < 0;
     const isUrgent = days >= 0 && days <= 7;
 
-    // Border color based on urgency
-    const borderStyle = isOverdue
-        ? "border-l-[var(--accent-red)]"
+    // Left accent border colour
+    const borderAccent = isOverdue
+        ? "border-l-red-500"
         : isUrgent
-            ? "border-l-[var(--accent-yellow)]"
-            : "border-l-[var(--bg-border)]";
+            ? "border-l-amber-400"
+            : "border-l-slate-200";
+
+    // Status text colour
+    const urgencyColor = isOverdue
+        ? "text-red-600"
+        : isUrgent
+            ? "text-amber-600"
+            : "text-slate-400";
+
+    // Service badge colour
+    const serviceBadge = isOverdue
+        ? "bg-red-50 text-red-700 border border-red-200"
+        : isUrgent
+            ? "bg-amber-50 text-amber-700 border border-amber-200"
+            : "bg-slate-100 text-slate-600 border border-slate-200";
 
     async function handleWhatsApp() {
         if (sending || sent) return;
@@ -62,45 +76,44 @@ export function UrgentActionCard({ item, onNotified }: UrgentActionCardProps) {
     return (
         <article
             className={cn(
-                "card border-l-4 flex gap-3 items-start animate-fade-in",
-                borderStyle
+                "card border-l-4 flex gap-3 items-center animate-fade-in",
+                borderAccent
             )}
             role="listitem"
             aria-label={`Revisión de ${item.customerName}, ${item.vehiclePlate}`}
         >
             {/* Service icon */}
             <div
-                className="text-2xl flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg"
-                style={{ background: "var(--bg-raised)" }}
+                className="text-xl flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100"
                 aria-hidden="true"
             >
                 {SERVICE_ICONS[item.serviceType]}
             </div>
 
             {/* Info block */}
-            <div className="flex-1 min-w-0 space-y-1">
+            <div className="flex-1 min-w-0">
                 {/* Plate + Model */}
-                <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-black text-base tracking-widest text-[var(--text-primary)]">
+                <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="font-bold text-sm tracking-widest text-slate-900">
                         {item.vehiclePlate}
                     </span>
-                    <span className="text-xs text-[var(--text-muted)] truncate">{item.brandModel}</span>
+                    <span className="text-xs text-slate-400 truncate">{item.brandModel}</span>
                 </div>
 
                 {/* Customer */}
-                <p className="text-sm text-[var(--text-secondary)] truncate">{item.customerName}</p>
+                <p className="text-sm text-slate-600 truncate leading-tight">{item.customerName}</p>
 
-                {/* Service type + due urgency */}
-                <div className="flex items-center gap-2 flex-wrap">
-                    <span className="badge badge-pending text-[0.7rem]">
-                        {SERVICE_LABELS[item.serviceType]}
-                    </span>
+                {/* Service type + due date */}
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                     <span
                         className={cn(
-                            "text-xs font-bold",
-                            isOverdue ? "glow-red" : isUrgent ? "glow-yellow" : "text-[var(--text-muted)]"
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold",
+                            serviceBadge
                         )}
                     >
+                        {SERVICE_LABELS[item.serviceType]}
+                    </span>
+                    <span className={cn("text-xs font-semibold", urgencyColor)}>
                         {getUrgencyLabel(item.nextDueDate)}
                     </span>
                 </div>
@@ -110,8 +123,7 @@ export function UrgentActionCard({ item, onNotified }: UrgentActionCardProps) {
             <div className="flex-shrink-0 self-center">
                 {sent ? (
                     <span
-                        className="flex items-center gap-1 text-xs font-semibold"
-                        style={{ color: "var(--accent-green)" }}
+                        className="flex items-center gap-1 text-xs font-semibold text-emerald-600"
                         aria-label="Aviso enviado"
                     >
                         <CheckCircle2 size={18} />

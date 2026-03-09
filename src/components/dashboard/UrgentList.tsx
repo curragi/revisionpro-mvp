@@ -1,10 +1,9 @@
 // components/dashboard/UrgentList.tsx
-// List of urgent maintenance action items for the dashboard.
+// List of urgent maintenance action items. Clean light-mode layout.
 
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle } from "lucide-react";
 import { UrgentActionCard } from "./UrgentActionCard";
 import type { MaintenanceItem } from "@/lib/utils";
 
@@ -24,9 +23,9 @@ export function UrgentList({ items }: UrgentListProps) {
     if (list.length === 0) {
         return (
             <div className="mx-4 card flex flex-col items-center gap-3 py-10 text-center">
-                <span className="text-4xl">✅</span>
-                <p className="font-bold text-[var(--text-primary)]">¡Al día!</p>
-                <p className="text-sm text-[var(--text-muted)]">No hay revisiones urgentes este mes.</p>
+                <span className="text-4xl" role="img" aria-label="Completado">✅</span>
+                <p className="font-semibold text-slate-800">¡Todo al día!</p>
+                <p className="text-sm text-slate-400">No hay revisiones urgentes este mes.</p>
             </div>
         );
     }
@@ -34,13 +33,13 @@ export function UrgentList({ items }: UrgentListProps) {
     return (
         <section aria-label="Acciones urgentes">
             {/* Section header */}
-            <div className="flex items-center gap-2 px-4 py-3">
-                <AlertTriangle size={16} className="text-[var(--accent-yellow)]" aria-hidden="true" />
-                <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+            <div className="flex items-center gap-2 px-4 pb-3">
+                <h2 className="text-base font-bold text-slate-900">
                     Acciones urgentes
                 </h2>
+                {/* Count badge */}
                 <span
-                    className="badge badge-pending ml-auto text-xs"
+                    className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-red-600 text-xs font-bold"
                     aria-label={`${list.length} pendientes`}
                 >
                     {list.length}
@@ -52,6 +51,7 @@ export function UrgentList({ items }: UrgentListProps) {
                 {list.map((item, i) => (
                     <div
                         key={item.id}
+                        className="animate-fade-in"
                         style={{ animationDelay: `${i * 60}ms` }}
                     >
                         <UrgentActionCard item={item} onNotified={handleNotified} />
