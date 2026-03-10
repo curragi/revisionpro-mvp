@@ -5,13 +5,12 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { MessageCircle, CheckCircle2 } from "lucide-react";
 import {
     cn,
     formatDateShort,
     getUrgencyLabel,
     daysUntilDue,
-    sendWhatsAppReminder,
     SERVICE_LABELS,
     SERVICE_ICONS,
     type MaintenanceItem,
@@ -24,7 +23,7 @@ interface UrgentActionCardProps {
 }
 
 export function UrgentActionCard({ item, onNotified }: UrgentActionCardProps) {
-    const [sending, setSending] = useState(false);
+
     const [sent, setSent] = useState(item.status === "notified");
 
     const days = daysUntilDue(item.nextDueDate);
@@ -52,25 +51,23 @@ export function UrgentActionCard({ item, onNotified }: UrgentActionCardProps) {
             ? "bg-amber-50 text-amber-700 border border-amber-200"
             : "bg-slate-100 text-slate-600 border border-slate-200";
 
-    async function handleWhatsApp() {
-        if (sending || sent) return;
-        setSending(true);
-        try {
-            await sendWhatsAppReminder({
-                customerName: item.customerName,
-                customerPhone: item.customerPhone,
-                vehiclePlate: item.vehiclePlate,
-                serviceType: item.serviceType,
-                nextDueDate: formatDateShort(item.nextDueDate),
-                shopName: SHOP_NAME,
-            });
-            setSent(true);
-            onNotified?.(item.id);
-        } catch (err) {
-            console.error("[RevisiónPro] Error sending WhatsApp:", err);
-        } finally {
-            setSending(false);
-        }
+    function handleWhatsApp() {
+        if (sent) return;
+
+        const formattedPhone = item.customerPhone.replace(/\s+/g, "");
+        const serviceLabel = SERVICE_LABELS[item.serviceType] ?? item.serviceType;
+        const text =
+            `Hola ${item.customerName}, somos de ${SHOP_NAME}. ` +
+            `Vemos que a tu vehículo ${item.vehiclePlate} le toca ${serviceLabel}. ` +
+            `¿Te buscamos un hueco esta semana?`;
+
+        window.open(
+            `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`,
+            "_blank"
+        );
+
+        setSent(true);
+        onNotified?.(item.id);
     }
 
     return (
@@ -132,15 +129,10 @@ export function UrgentActionCard({ item, onNotified }: UrgentActionCardProps) {
                 ) : (
                     <button
                         onClick={handleWhatsApp}
-                        disabled={sending}
                         className="btn-whatsapp"
                         aria-label={`Avisar por WhatsApp a ${item.customerName}`}
                     >
-                        {sending ? (
-                            <Loader2 size={16} className="animate-spin" />
-                        ) : (
-                            <MessageCircle size={16} />
-                        )}
+                        <MessageCircle size={16} />
                         <span className="hidden sm:inline">Avisar</span>
                     </button>
                 )}
